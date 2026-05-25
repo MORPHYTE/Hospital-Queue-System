@@ -1,25 +1,3 @@
-/**
- * =============================================================================
- * ManualLinkedList.h - Struktur Data & Algoritma Manual
- * =============================================================================
- * BONUS: Linked List diimplementasikan MANUAL tanpa std::list / std::vector
- *
- * ALGORITMA YANG DIIMPLEMENTASIKAN:
- * - Merge Sort  (Sorting manual, tidak menggunakan fungsi library)
- * - Linear Search  (Searching manual by name)
- * - Binary Search  (Searching manual by ID pada array terurut)
- *
- * ANALISIS KOMPLEKSITAS (Big O Notation):
- * - add()            : O(n log n)  → karena memanggil sort() setelah insert
- * - popFront()      : O(1)        → langsung ambil head
- * - linearSearch()  : O(n)        → worst case cek semua node
- * - binarySearch()  : O(n log n)  → O(n) konversi array + O(log n) search
- * - mergeSort()     : O(n log n)  → divide and conquer
- * - toArray()       : O(n)        → traversal semua node
- * - getSize()       : O(1)        → menyimpan counter
- * =============================================================================
- */
-
 #ifndef MANUALLINKEDLIST_H
 #define MANUALLINKEDLIST_H
 
