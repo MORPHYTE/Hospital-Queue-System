@@ -1,7 +1,3 @@
-/**
- * HospitalClient.cpp - Client Interaktif (Windows/Winsock2)
- * Kompilasi: g++ -o client.exe HospitalClient.cpp -lws2_32 -std=c++17 -pthread
- */
 
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
@@ -19,13 +15,10 @@
 #define PORT 8080
 #define BUFFER_SIZE 8192
 
-using namespace std; // Global namespace directive
+using namespace std;
 
 atomic<bool> running(true);
 
-// ============================================================
-// Helper: Ekstrak nilai dari JSON string secara manual
-// ============================================================
 string jsonGet(const string& js, const string& key) {
     string k = "\"" + key + "\"";
     size_t p = js.find(k);
@@ -42,9 +35,6 @@ string jsonGet(const string& js, const string& key) {
     return js.substr(p, e - p);
 }
 
-// ============================================================
-// Helper: Tampilkan antrian dari JSON array
-// ============================================================
 void printQueue(const string& msg) {
     string total = jsonGet(msg, "total");
 
@@ -54,7 +44,6 @@ void printQueue(const string& msg) {
     cout << "| Total pasien: " << total << "\n";
     cout << "+------------------------------------------------+\n";
 
-    // Parse array JSON data pasien secara manual
     size_t arrStart = msg.find("\"data\":[");
     if (arrStart == string::npos || msg.find("[]") != string::npos) {
         if (total == "0" || total.empty())
@@ -87,9 +76,6 @@ void printQueue(const string& msg) {
     cout << "+------------------------------------------------+\n";
 }
 
-// ============================================================
-// Thread: Terima pesan dari server secara real-time
-// ============================================================
 void receiveLoop(SOCKET sock) {
     char buf[BUFFER_SIZE];
     string leftover;
@@ -174,17 +160,11 @@ void receiveLoop(SOCKET sock) {
     }
 }
 
-// ============================================================
-// Helper: Kirim JSON ke server dengan terminator '\n'
-// ============================================================
 void sendJson(SOCKET sock, const string& json) {
     string msg = json + "\n";
     send(sock, msg.c_str(), (int)msg.size(), 0);
 }
 
-// ============================================================
-// Main: Menu interaktif
-// ============================================================
 int main() {
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
@@ -212,9 +192,6 @@ int main() {
     thread recvThread(receiveLoop, sock);
     recvThread.detach();
 
-    // --------------------------------------------------------
-    // Loop menu interaktif
-    // --------------------------------------------------------
     while (running) {
         cout << "\n================================================\n";
         cout << "     DIGITAL HOSPITAL QUEUE SYSTEM\n";
