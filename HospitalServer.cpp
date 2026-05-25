@@ -1,14 +1,3 @@
-/**
- * HospitalServer.cpp - Server Multithreaded (Windows/Winsock2)
- * Kompilasi: g++ -o server.exe HospitalServer.cpp -lws2_32 -std=c++17 -pthread
- *
- * FITUR:
- * - Socket Programming Winsock2 (Client-Server)
- * - BONUS: Multithreading - tiap client di thread terpisah
- * - BONUS: Mutex sinkronisasi shared data
- * - JSON manual untuk pertukaran data
- */
-
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -28,9 +17,6 @@ using namespace std;
 #define PORT        8080
 #define BUFFER_SIZE 8192
 
-// ============================================================
-// Shared state (dilindungi mutex - BONUS multithreading)
-// ============================================================
 mutex queueMutex;
 mutex clientsMutex;
 ManualLinkedList<Patient*> patientQueue;
@@ -38,9 +24,6 @@ vector<SOCKET> clients;
 int idCounter = 1000;
 int arrivalCounter = 0;
 
-// ============================================================
-// Helper: Ekstrak nilai dari JSON string secara manual
-// ============================================================
 string jsonGet(const string& js, const string& key) {
     string k = "\"" + key + "\"";
     size_t p = js.find(k);
@@ -57,10 +40,6 @@ string jsonGet(const string& js, const string& key) {
     return js.substr(p, e - p);
 }
 
-// ============================================================
-// Broadcast antrian ke semua client yang terhubung
-// Kompleksitas: O(n * c) → n pasien, c client
-// ============================================================
 void broadcastQueue() {
     string data;
     {
@@ -76,9 +55,6 @@ void broadcastQueue() {
         send(s, data.c_str(), (int)data.size(), 0);
 }
 
-// ============================================================
-// Handler: Tambah pasien
-// ============================================================
 void doAddPatient(SOCKET sock, const string& req) {
     string type = jsonGet(req, "type");
     string name = jsonGet(req, "name");
@@ -110,9 +86,6 @@ void doAddPatient(SOCKET sock, const string& req) {
     broadcastQueue();
 }
 
-// ============================================================
-// Handler: Panggil pasien berikutnya (prioritas tertinggi)
-// ============================================================
 void doCallNext(SOCKET sock) {
     Patient* p = nullptr;
     {
@@ -131,9 +104,6 @@ void doCallNext(SOCKET sock) {
     broadcastQueue();
 }
 
-// ============================================================
-// Handler: Cari berdasarkan nama - Linear Search O(n)
-// ============================================================
 void doSearchName(SOCKET sock, const string& req) {
     string name = jsonGet(req, "name");
     lock_guard<mutex> lk(queueMutex);
@@ -147,9 +117,6 @@ void doSearchName(SOCKET sock, const string& req) {
     send(sock, resp.c_str(), (int)resp.size(), 0);
 }
 
-// ============================================================
-// Handler: Cari berdasarkan ID - Binary Search O(log n)
-// ============================================================
 void doSearchId(SOCKET sock, const string& req) {
     string idStr = jsonGet(req, "id");
     if (idStr.empty()) {
@@ -166,9 +133,6 @@ void doSearchId(SOCKET sock, const string& req) {
     send(sock, resp.c_str(), (int)resp.size(), 0);
 }
 
-// ============================================================
-// Thread per client (BONUS: Multithreading)
-// ============================================================
 void handleClient(SOCKET sock) {
     char buf[BUFFER_SIZE];
     string leftover;
@@ -208,9 +172,6 @@ void handleClient(SOCKET sock) {
     closesocket(sock);
 }
 
-// ============================================================
-// Main
-// ============================================================
 int main() {
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
@@ -252,13 +213,11 @@ int main() {
 
         { lock_guard<mutex> lk(clientsMutex); clients.push_back(cSock); }
 
-        // Kirim state antrian saat ini ke client baru
         string q;
         { lock_guard<mutex> lk(queueMutex);
           q = "{\"status\":\"QUEUE_UPDATE\",\"total\":" + to_string(patientQueue.getSize()) + ",\"data\":" + patientQueue.toJsonArray() + "}\n"; }
         send(cSock, q.c_str(), (int)q.size(), 0);
 
-        // BONUS: Thread baru per client dengan sinkronisasi mutex
         thread(handleClient, cSock).detach();
     }
 
