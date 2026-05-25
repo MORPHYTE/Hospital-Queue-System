@@ -131,16 +131,6 @@ public:
         return data;
     }
 
-    // ----------------------------------------------------------
-    // ALGORITMA SEARCHING MANUAL 1: Linear Search by Name
-    // Mencari pasien berdasarkan nama (substring, case-insensitive)
-    //
-    // Big O Analysis:
-    //   - Best Case  : O(1)  → elemen pertama cocok
-    //   - Average    : O(n/2) ≈ O(n)
-    //   - Worst Case : O(n)  → elemen terakhir atau tidak ada
-    //   - Space      : O(1)
-    // ----------------------------------------------------------
     T linearSearchByName(const string& name) const {
         Node<T>* cur = head;
 
@@ -161,19 +151,6 @@ public:
         return nullptr; // Tidak ditemukan
     }
 
-    // ----------------------------------------------------------
-    // ALGORITMA SEARCHING MANUAL 2: Binary Search by ID
-    // List sudah terurut by priorityScore (desc), bukan by ID.
-    // Oleh karena itu kita konversi ke array, sort by ID,
-    // lalu lakukan Binary Search.
-    //
-    // Big O Analysis:
-    //   - Konversi ke array : O(n)
-    //   - Insertion sort by ID: O(n^2) worst (umumnya data kecil)
-    //   - Binary Search     : O(log n)
-    //   - Total Worst Case  : O(n^2) → didominasi sorting
-    //   - Space             : O(n)   → array sementara
-    // ----------------------------------------------------------
     T binarySearchById(int targetId) const {
         if (!head) return nullptr;
 
