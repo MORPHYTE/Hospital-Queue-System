@@ -137,4 +137,4 @@ public:
     int getArrivalOrder() const { return arrivalOrder; }
 };
 
-#endif // PATIENT_H
+#endif // Dikerjakan oleh Razi Aditya Rahmanto
