@@ -1,15 +1,3 @@
-/**
- * =============================================================================
- * Patient.h - Hierarki Kelas Pasien
- * =============================================================================
- * PILAR OOP YANG DIIMPLEMENTASIKAN:
- * 1. Abstraksi    : Patient adalah pure abstract class (ada pure virtual func)
- * 2. Enkapsulasi  : Atribut protected/private, diakses via getter/setter publik
- * 3. Pewarisan    : EmergencyPatient & RegularPatient mewarisi Patient
- * 4. Polimorfisme : calculatePriority(), displayInfo(), toJson() di-override
- * =============================================================================
- */
-
 #ifndef PATIENT_H
 #define PATIENT_H
 
