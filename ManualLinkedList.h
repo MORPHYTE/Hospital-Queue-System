@@ -5,9 +5,6 @@
 #include <stdexcept>
 using namespace std;
 
-// ============================================================
-// Node: Unit dasar dari Linked List
-// ============================================================
 template <typename T>
 struct Node {
     T data;
@@ -15,26 +12,16 @@ struct Node {
     explicit Node(T d) : data(d), next(nullptr) {}
 };
 
-// ============================================================
-// ManualLinkedList: Singly Linked List tanpa library apapun
-// BONUS: Implementasi Linked List secara manual
-// ============================================================
 template <typename T>
 class ManualLinkedList {
 private:
     Node<T>* head;
     int size;
 
-    // ----------------------------------------------------------
-    // MERGE SORT - Helper: Gabung dua sublist terurut (descending)
-    // Kompleksitas: O(n) untuk setiap level merge
-    // ----------------------------------------------------------
     Node<T>* merge(Node<T>* left, Node<T>* right) {
         if (!left)  return right;
         if (!right) return left;
 
-        // Urutkan descending berdasarkan priorityScore
-        // EmergencyPatient (skor ~1100-1500) selalu duluan dari Regular (~499--)
         if (left->data->getPriorityScore() >= right->data->getPriorityScore()) {
             left->next = merge(left->next, right);
             return left;
@@ -44,17 +31,11 @@ private:
         }
     }
 
-    // ----------------------------------------------------------
-    // MERGE SORT - Helper: Belah list menjadi dua bagian
-    // Menggunakan teknik fast/slow pointer (Floyd's algorithm)
-    // Kompleksitas: O(n)
-    // ----------------------------------------------------------
     void splitList(Node<T>* source, Node<T>** front, Node<T>** back) {
         Node<T>* slow = source;
         Node<T>* fast = source->next;
 
-        // fast bergerak 2x lebih cepat dari slow
-        // Ketika fast sampai akhir, slow ada di tengah
+ 
         while (fast != nullptr) {
             fast = fast->next;
             if (fast != nullptr) {
@@ -65,31 +46,22 @@ private:
 
         *front = source;
         *back  = slow->next;
-        slow->next = nullptr; // Putus koneksi di tengah
+        slow->next = nullptr; 
     }
 
-    // ----------------------------------------------------------
-    // MERGE SORT - Fungsi Rekursif Utama
-    // Algoritma Sorting Manual (tidak menggunakan fungsi bawaan library)
-    //
-    // Big O Analysis:
-    //   - Best Case    : O(n log n) → selalu divide & conquer
-    //   - Average Case : O(n log n)
-    //   - Worst Case   : O(n log n)
-    //   - Space        : O(log n)   → rekursi stack
-    // ----------------------------------------------------------
+
     void mergeSortHelper(Node<T>** headRef) {
         Node<T>* h = *headRef;
-        if (!h || !h->next) return; // Base case: 0 atau 1 elemen
+        if (!h || !h->next) return; 
 
         Node<T>* a;
         Node<T>* b;
-        splitList(h, &a, &b); // Bagi dua
+        splitList(h, &a, &b); 
 
-        mergeSortHelper(&a);  // Rekursi kiri
-        mergeSortHelper(&b);  // Rekursi kanan
+        mergeSortHelper(&a);  
+        mergeSortHelper(&b);  
 
-        *headRef = merge(a, b); // Gabung hasil
+        *headRef = merge(a, b); 
     }
 
 public:
@@ -99,34 +71,26 @@ public:
         Node<T>* cur = head;
         while (cur) {
             Node<T>* next = cur->next;
-            delete cur->data; // Bebaskan memori objek Patient
+            delete cur->data;
             delete cur;
             cur = next;
         }
     }
 
-    // ----------------------------------------------------------
-    // add(): Tambah pasien dan auto-sort berdasarkan prioritas
-    // Kompleksitas: O(n log n) → karena sort dipanggil setelah insert
-    // ----------------------------------------------------------
     void add(T data) {
         Node<T>* newNode = new Node<T>(data);
         newNode->next = head;
         head = newNode;
         size++;
-        mergeSortHelper(&head); // Auto-sort setelah insert
+        mergeSortHelper(&head);
     }
 
-    // ----------------------------------------------------------
-    // popFront(): Ambil pasien dengan prioritas tertinggi (head)
-    // Kompleksitas: O(1)
-    // ----------------------------------------------------------
     T popFront() {
         if (!head) return nullptr;
         Node<T>* temp = head;
         T data = temp->data;
         head = head->next;
-        delete temp; // Hapus node, tapi TIDAK hapus data (dikembalikan)
+        delete temp;
         size--;
         return data;
     }
@@ -134,7 +98,6 @@ public:
     T linearSearchByName(const string& name) const {
         Node<T>* cur = head;
 
-        // Konversi keyword ke lowercase untuk case-insensitive search
         string lowerName = name;
         for (char& c : lowerName) c = tolower(c);
 
@@ -142,19 +105,17 @@ public:
             string patName = cur->data->getName();
             for (char& c : patName) c = tolower(c);
 
-            // Cek apakah name adalah substring dari nama pasien
             if (patName.find(lowerName) != string::npos) {
                 return cur->data;
             }
             cur = cur->next;
         }
-        return nullptr; // Tidak ditemukan
+        return nullptr;
     }
 
     T binarySearchById(int targetId) const {
         if (!head) return nullptr;
 
-        // Langkah 1: Salin ke array sementara
         int arrSize = size;
         T* arr = new T[arrSize];
         Node<T>* cur     = head;
@@ -163,8 +124,6 @@ public:
             cur = cur->next;
         }
 
-        // Langkah 2: Insertion Sort array by ID (ascending) - O(n^2)
-        // (Diperlukan agar Binary Search bisa bekerja)
         // 
         for (int i = 1; i < arrSize; i++) {
             T key = arr[i];
@@ -176,8 +135,7 @@ public:
             arr[j + 1] = key;
         }
 
-        // Langkah 3: Binary Search - O(log n)
-        // 
+
         int lo = 0, hi = arrSize - 1;
         T result = nullptr;
         while (lo <= hi) {
@@ -185,12 +143,12 @@ public:
             int midId  = arr[mid]->getPatientId();
 
             if (midId == targetId) {
-                result = arr[mid]; // Ditemukan
+                result = arr[mid]; 
                 break;
             } else if (midId < targetId) {
-                lo = mid + 1;     // Cari di kanan
+                lo = mid + 1;    
             } else {
-                hi = mid - 1;     // Cari di kiri
+                hi = mid - 1;    
             }
         }
 
@@ -198,10 +156,6 @@ public:
         return result;
     }
 
-    // ----------------------------------------------------------
-    // removeById(): Hapus pasien berdasarkan ID
-    // Kompleksitas: O(n) → linear traversal
-    // ----------------------------------------------------------
     T removeById(int id) {
         Node<T>* cur  = head;
         Node<T>* prev = nullptr;
@@ -211,7 +165,7 @@ public:
             cur  = cur->next;
         }
 
-        if (!cur) return nullptr; // Tidak ditemukan
+        if (!cur) return nullptr; 
 
         T data = cur->data;
         if (!prev) {
@@ -224,10 +178,6 @@ public:
         return data;
     }
 
-    // ----------------------------------------------------------
-    // toJsonArray(): Konversi seluruh list ke JSON array string
-    // Kompleksitas: O(n) → traversal semua node
-    // ----------------------------------------------------------
     string toJsonArray() const {
         string result = "[";
         Node<T>* cur = head;
@@ -242,9 +192,7 @@ public:
         return result;
     }
 
-    // ----------------------------------------------------------
-    // Utilitas
-    // ----------------------------------------------------------
+
     int  getSize() const { return size; }
     bool isEmpty() const { return head == nullptr; }
 
